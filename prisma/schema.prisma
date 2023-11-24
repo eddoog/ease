@@ -10,11 +10,89 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  PELANGGAN
+  PENGELOLA_LAUNDRY
+}
+
+enum Status {
+  MENUNGGU_KONFIRMASI
+  DIPROSES
+  DIKIRIM
+  SELESAI
+}
+
+enum Tags {
+  SEPATU
+  BAJU
+  SEPRAI
+  JAKET
+}
+
+enum Days {
+  SENIN
+  SELASA
+  RABU
+  KAMIS
+  JUMAT
+  SABTU
+  MINGGU
+}
+
 model User {
-  id        String      @id @default(uuid())
-  email     String   @unique
-  name      String?
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String            @id @default(uuid())
+  email            String            @unique
+  name             String
+  password         String
+  address          String
+  image            String
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  Pelanggan        Pelanggan?
+  PengelolaLaundry PengelolaLaundry?
+}
+
+model Pelanggan {
+  userId  String    @unique
+  user    User      @relation(fields: [userId], references: [id])
+  Pesanan Pesanan[]
+}
+
+model PengelolaLaundry {
+  userId            String              @unique
+  totalMoney        Int
+  user              User                @relation(fields: [userId], references: [id])
+  jadwalOperasional JadwalOperasional[]
+
+  Pesanan   Pesanan[]
+  Pemasukan Pemasukan[]
+}
+
+model Pesanan {
+  id        String    @id @default(uuid())
+  berat     Float?
+  total     Int?
+  status    Status?
+  timeStamp DateTime?
+
+  pelangganId        String
+  pelanggan          Pelanggan        @relation(fields: [pelangganId], references: [userId])
+  pengelolaLaundryId String
+  pengelolaLaundry   PengelolaLaundry @relation(fields: [pengelolaLaundryId], references: [userId])
+}
+
+model JadwalOperasional {
+  id                 Int              @id @default(autoincrement())
+  hari               Days
+  jamBuka            String
+  jamTutup           String
+  pengelolaLaundryId String
+  pengelolaLaundry   PengelolaLaundry @relation(fields: [pengelolaLaundryId], references: [userId])
+}
+
+model Pemasukan {
+  id                 Int              @id @default(autoincrement())
+  total              Int
+  pengelolaLaundryId String
+  pengelolaLaundry   PengelolaLaundry @relation(fields: [pengelolaLaundryId], references: [userId])
 }
