@@ -1,0 +1,4 @@
+export enum Role {
+  PELANGGAN = 'PELANGGAN',
+  PENGELOLA_LAUNDRY = 'PENGELOLA_LAUNDRY',
+}
