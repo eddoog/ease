@@ -6,6 +6,9 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
+import { PelangganModule } from './pelanggan/pelanggan.module';
+import { PengelolaLaundryModule } from './pengelola-laundry/pengelola-laundry.module';
+import { DatabasePengelolaLaundryModule } from './database-pengelola-laundry/database-pengelola-laundry.module';
 
 @Module({
   imports: [
@@ -16,6 +19,9 @@ import { ConfigModule } from '@nestjs/config';
     CloudinaryModule,
     UserModule,
     AuthModule,
+    PelangganModule,
+    PengelolaLaundryModule,
+    DatabasePengelolaLaundryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
