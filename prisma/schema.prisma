@@ -68,14 +68,15 @@ model PengelolaLaundry {
 
   Pesanan   Pesanan[]
   Pemasukan Pemasukan[]
+  Penilaian Penilaian[]
 }
 
 model Pesanan {
-  id        String    @id @default(uuid())
-  berat     Float?
-  total     Int?
-  status    Status?
-  timeStamp DateTime?
+  id           String    @id @default(uuid())
+  berat        Float?
+  harga        Float?
+  status       Status?   @default(MENUNGGU_KONFIRMASI)
+  waktuPesanan DateTime? @default(now())
 
   pelangganId        String
   pelanggan          Pelanggan        @relation(fields: [pelangganId], references: [userId])
@@ -94,7 +95,17 @@ model JadwalOperasional {
 
 model Pemasukan {
   id                 Int              @id @default(autoincrement())
-  total              Int
+  nominal            Float
+  Date               DateTime         @default(now())
+  pengelolaLaundryId String
+  pengelolaLaundry   PengelolaLaundry @relation(fields: [pengelolaLaundryId], references: [userId])
+}
+
+model Penilaian {
+  id     Int     @id @default(autoincrement())
+  nilai  Int
+  ulasan String?
+
   pengelolaLaundryId String
   pengelolaLaundry   PengelolaLaundry @relation(fields: [pengelolaLaundryId], references: [userId])
 }
