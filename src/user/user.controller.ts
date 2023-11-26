@@ -16,17 +16,21 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ImageFileFilter } from './filters';
 import { JwtAuthGuard } from 'src/guard';
 import { User } from '@prisma/client';
-import { GetUser } from 'src/decorator';
+import { GetUser, Roles } from 'src/decorator';
 import { ApiTags } from '@nestjs/swagger';
+import { RolesGuard } from 'src/guard/roles.guard';
+import { Role } from 'src/common';
 
 @ApiTags('user')
 @Controller('user')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
+  @Roles(Role.PENGELOLA_LAUNDRY, Role.PELANGGAN)
   getCurrentUser(@GetUser() user: User) {
+    console.log(Role.PELANGGAN);
     return user;
   }
 
