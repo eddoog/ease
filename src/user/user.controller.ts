@@ -8,15 +8,27 @@ import {
   Delete,
   UseInterceptors,
   UploadedFile,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto, UpdateUserDto } from './dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ImageFileFilter } from './filters';
+import { JwtAuthGuard } from 'src/auth/guard';
+import { User } from '@prisma/client';
+import { GetUser } from 'src/auth/decorator';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('user')
 @Controller('user')
+@UseGuards(JwtAuthGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  @Get()
+  getCurrentUser(@GetUser() user: User) {
+    return user;
+  }
 
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
