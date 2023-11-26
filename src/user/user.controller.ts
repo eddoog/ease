@@ -14,9 +14,9 @@ import { UserService } from './user.service';
 import { CreateUserDto, UpdateUserDto } from './dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ImageFileFilter } from './filters';
-import { JwtAuthGuard } from 'src/auth/guard';
+import { JwtAuthGuard } from 'src/guard';
 import { User } from '@prisma/client';
-import { GetUser } from 'src/auth/decorator';
+import { GetUser } from 'src/decorator';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('user')
