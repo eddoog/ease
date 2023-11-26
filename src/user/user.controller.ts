@@ -11,8 +11,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { Role } from 'src/common';
 import { GetUser, Roles } from 'src/decorator';
-import { JwtAuthGuard } from 'src/guard';
-import { RolesGuard } from 'src/guard/roles.guard';
+import { JwtAuthGuard, RolesGuard } from 'src/guard';
 import { ImageFileFilter } from './filters';
 import { UserService } from './user.service';
 
