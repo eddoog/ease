@@ -1,16 +1,13 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  Injectable,
-} from '@nestjs/common';
-import { LoginDTO, RegisterDTO } from './dto';
-import { JwtService } from '@nestjs/jwt';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { hash, verify } from 'argon2';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { JwtService } from '@nestjs/jwt';
 import { Role } from '@prisma/client';
+import { hash, verify } from 'argon2';
+import { UploadApiErrorResponse, UploadApiResponse } from 'cloudinary';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { ResponseDTO } from 'src/common';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { LoginDTO, RegisterDTO } from './dto';
 
 @Injectable()
 export class AuthService {
@@ -18,16 +15,13 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly prismaService: PrismaService,
     private readonly configService: ConfigService,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   async login(dto: LoginDTO): Promise<ResponseDTO> {
     const { email, password } = dto;
 
-    const user = await this.prismaService.user.findUnique({
-      where: {
-        email,
-      },
-    });
+    const user = await this.findUser(email);
 
     if (!user) {
       throw new BadRequestException('User not found');
@@ -36,62 +30,47 @@ export class AuthService {
     const isPasswordValid = await verify(user.password, password);
 
     if (!isPasswordValid) {
-      throw new BadRequestException('Invalid password');
+      throw new BadRequestException('Password does not match');
     }
+
+    const accessToken = await this.signToken(user.id, user.email);
 
     return {
       statusCode: 200,
       message: 'Success',
       data: {
-        accessToken: '',
+        accessToken: accessToken,
       },
     };
   }
 
-  async register(dto: RegisterDTO) {
+  async register(dto: RegisterDTO, image: Express.Multer.File) {
+    const user = await this.findUser(dto.email);
+
+    if (!!user) {
+      throw new BadRequestException('User already exist');
+    }
+
     const role = Role[dto.role.toUpperCase() as keyof typeof Role];
     const hashedPassword = await hash(dto.password);
 
-    try {
-      const user = await this.prismaService.user.create({
-        data: {
-          email: dto.email,
-          password: hashedPassword,
-          name: dto.name,
-          role: role,
-          ...(dto.address && { address: dto.address }),
-          ...(dto.image && { image: dto.image }),
-        },
-      });
+    const stringifiedImage = image ? await this.uploadImage(image) : undefined;
 
-      switch (role) {
-        case Role.PELANGGAN:
-          await this.prismaService.pelanggan.create({
-            data: {
-              userId: user.id,
-            },
-          });
-          break;
-        case Role.PENGELOLA_LAUNDRY:
-          await this.prismaService.pengelolaLaundry.create({
-            data: {
-              userId: user.id,
-              ...(dto.deskripsi && { image: dto.deskripsi }),
-            },
-          });
-          break;
-        default:
-          break;
-      }
-    } catch (error) {
-      if (!(error instanceof PrismaClientKnownRequestError)) return error;
-      if (error.code === 'P2002') {
-        throw new ForbiddenException('User already exists');
-      }
-    }
+    const newUser = await this.createUser(
+      dto,
+      hashedPassword,
+      role,
+      stringifiedImage,
+    );
+
+    const accessToken = await this.signToken(newUser.id, newUser.email);
 
     return {
-      accessToken: '',
+      statusCode: 201,
+      message: "User's account has been created",
+      data: {
+        accessToken: accessToken,
+      },
     };
   }
 
@@ -109,7 +88,60 @@ export class AuthService {
     return token;
   }
 
-  async createPelanggan() {
-    return;
+  async uploadImage(image: Express.Multer.File) {
+    const uploadedImage = await this.cloudinaryService.uploadImage(image);
+    return uploadedImage;
+  }
+
+  async findUser(email: string) {
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    return user;
+  }
+
+  async createUser(
+    dto: RegisterDTO,
+    password: string,
+    role: Role,
+    image: UploadApiResponse | UploadApiErrorResponse,
+  ) {
+    return await this.prismaService.$transaction(async (prisma) => {
+      const user = await prisma.user.create({
+        data: {
+          email: dto.email,
+          password: password,
+          name: dto.name,
+          role: role,
+          image: image?.secure_url,
+          ...(dto.address && { address: dto.address }),
+        },
+      });
+
+      switch (role) {
+        case Role.PELANGGAN:
+          await prisma.pelanggan.create({
+            data: {
+              userId: user.id,
+            },
+          });
+          break;
+        case Role.PENGELOLA_LAUNDRY:
+          await prisma.pengelolaLaundry.create({
+            data: {
+              userId: user.id,
+              ...(dto.deskripsi && { deskripsi: dto.deskripsi }),
+            },
+          });
+          break;
+        default:
+          break;
+      }
+
+      return user;
+    });
   }
 }

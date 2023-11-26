@@ -11,11 +11,6 @@ export class RegisterDTO extends LoginDTO {
   @IsString()
   address: string;
 
-  @IsOptional()
-  @IsNotEmpty()
-  @IsString()
-  image: string;
-
   @IsNotEmpty()
   @IsString()
   role: string;
