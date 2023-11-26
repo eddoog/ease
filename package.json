@@ -12,7 +12,7 @@
     "db:dev:restart": "pnpm db:dev:rm && pnpm db:dev:up && timeout /t 20 /nobreak & pnpm prisma:dev:deploy",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "node dist/main && npx prisma migrate deploy",
+    "start": "node dist/main && npx prisma generate && npx prisma migrate deploy",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
