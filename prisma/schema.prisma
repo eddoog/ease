@@ -56,14 +56,14 @@ model User {
 
 model Pelanggan {
   userId  String    @unique
-  user    User      @relation(fields: [userId], references: [id])
+  user    User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   Pesanan Pesanan[]
 }
 
 model PengelolaLaundry {
   userId            String              @unique
   deskripsi         String?
-  user              User                @relation(fields: [userId], references: [id])
+  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   jadwalOperasional JadwalOperasional[]
 
   Pesanan   Pesanan[]
@@ -79,9 +79,9 @@ model Pesanan {
   waktuPesanan DateTime? @default(now())
 
   pelangganId        String
-  pelanggan          Pelanggan        @relation(fields: [pelangganId], references: [userId])
+  pelanggan          Pelanggan        @relation(fields: [pelangganId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
   pengelolaLaundryId String
-  pengelolaLaundry   PengelolaLaundry @relation(fields: [pengelolaLaundryId], references: [userId])
+  pengelolaLaundry   PengelolaLaundry @relation(fields: [pengelolaLaundryId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model JadwalOperasional {
@@ -90,7 +90,7 @@ model JadwalOperasional {
   jamBuka            String
   jamTutup           String
   pengelolaLaundryId String
-  pengelolaLaundry   PengelolaLaundry @relation(fields: [pengelolaLaundryId], references: [userId])
+  pengelolaLaundry   PengelolaLaundry @relation(fields: [pengelolaLaundryId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Pemasukan {
@@ -98,7 +98,7 @@ model Pemasukan {
   nominal            Float
   Date               DateTime         @default(now())
   pengelolaLaundryId String
-  pengelolaLaundry   PengelolaLaundry @relation(fields: [pengelolaLaundryId], references: [userId])
+  pengelolaLaundry   PengelolaLaundry @relation(fields: [pengelolaLaundryId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Penilaian {
@@ -107,5 +107,5 @@ model Penilaian {
   ulasan String?
 
   pengelolaLaundryId String
-  pengelolaLaundry   PengelolaLaundry @relation(fields: [pengelolaLaundryId], references: [userId])
+  pengelolaLaundry   PengelolaLaundry @relation(fields: [pengelolaLaundryId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
 }
