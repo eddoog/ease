@@ -72,11 +72,12 @@ model PengelolaLaundry {
 }
 
 model Pesanan {
-  id           String    @id @default(uuid())
-  berat        Float?
-  harga        Float?
-  status       Status?   @default(MENUNGGU_KONFIRMASI)
-  waktuPesanan DateTime? @default(now())
+  id                String    @id @default(uuid())
+  berat             Float?
+  harga             Float?
+  status            Status?   @default(MENUNGGU_KONFIRMASI)
+  waktuPesanan      DateTime? @default(now())
+  waktuPenyelesaian DateTime
 
   pelangganId        String
   pelanggan          Pelanggan        @relation(fields: [pelangganId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
