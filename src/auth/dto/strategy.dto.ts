@@ -9,5 +9,12 @@ export class JwtStrategyDTO {
     type: String,
   })
   readonly sub: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @ApiProperty({
+    title: 'email',
+    type: String,
+  })
   readonly email: string;
 }
