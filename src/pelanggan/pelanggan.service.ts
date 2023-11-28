@@ -12,7 +12,7 @@ export class PelangganService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async createPesanan(id: string, createPesananDto: CreatePesananDTO) {
-    const { idPengelolaLaundry } = createPesananDto;
+    const { idPengelolaLaundry, waktuPenyelesaian } = createPesananDto;
 
     const pengelolaLaundry = await this.getPengelolaLaundry(idPengelolaLaundry);
 
@@ -26,6 +26,7 @@ export class PelangganService {
         data: {
           pelangganId: id,
           pengelolaLaundryId: idPengelolaLaundry,
+          waktuPenyelesaian: waktuPenyelesaian,
         },
       });
     } catch (error) {
