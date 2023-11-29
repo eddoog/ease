@@ -40,4 +40,10 @@ export class UserController {
   ) {
     return this.userService.uploadImage(image);
   }
+
+  @Get('daftar-pesanan')
+  @Roles(Role.PENGELOLA_LAUNDRY, Role.PELANGGAN)
+  async getDaftarPesanan(@GetUser() user: User) {
+    return this.userService.getDaftarPesanan(user.id, user.role as Role);
+  }
 }
