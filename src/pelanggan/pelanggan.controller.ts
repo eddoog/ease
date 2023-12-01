@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Post, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Role } from 'src/common';
 import { GetUser, Roles } from 'src/decorator';
@@ -21,7 +21,7 @@ export class PelangganController {
     return this.pelangganService.createPesanan(id, createPesananDto);
   }
 
-  @Post('cancel-pesanan')
+  @Delete('cancel-pesanan')
   @Roles(Role.PELANGGAN)
   cancelPesanan(
     @GetUser('id') idPelanggan: string,
