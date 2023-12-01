@@ -1,7 +1,7 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { Role } from 'src/common';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class UserService {
@@ -29,5 +29,18 @@ export class UserService {
         where: { pengelolaLaundryId: userId },
       });
     }
+  }
+
+  async getDetailPesanan(pesananId: string) {
+    const pesanan = await this.prismaService.pesanan.findUnique({
+      where: {
+        id: pesananId,
+      },
+    });
+    return {
+      statusCode: 200,
+      message: 'Pesanan berhasil diambil',
+      data: pesanan,
+    };
   }
 }

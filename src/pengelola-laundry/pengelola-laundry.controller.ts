@@ -22,9 +22,7 @@ export class PengelolaLaundryController {
 
   @Post('create-penilaian')
   @Roles(Role.PELANGGAN)
-  async createPenilaian(
-    @Body() createPenilaianDTO: CreatePenilaianDTO,
-  ) {
+  async createPenilaian(@Body() createPenilaianDTO: CreatePenilaianDTO) {
     if (!!!createPenilaianDTO.rating) {
       throw new BadRequestException('Rating tidak boleh kosong');
     }
