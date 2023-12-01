@@ -1,7 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { Pesanan } from '@prisma/client';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { Role } from 'src/common';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class UserService {
@@ -20,14 +21,22 @@ export class UserService {
   }
 
   async getDaftarPesanan(userId: string, userRole: Role) {
+    let pesanan: Pesanan[];
+
     if (userRole === Role.PELANGGAN) {
-      return this.prismaService.pesanan.findMany({
+      pesanan = await this.prismaService.pesanan.findMany({
         where: { pelangganId: userId },
       });
     } else if (userRole === Role.PENGELOLA_LAUNDRY) {
-      return this.prismaService.pesanan.findMany({
+      pesanan = await this.prismaService.pesanan.findMany({
         where: { pengelolaLaundryId: userId },
       });
     }
+
+    return {
+      statusCode: 200,
+      message: 'Success',
+      data: pesanan,
+    };
   }
 }
