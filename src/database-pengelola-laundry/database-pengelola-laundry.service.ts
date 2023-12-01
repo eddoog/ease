@@ -30,26 +30,30 @@ export class DatabasePengelolaLaundryService {
     const keyword = filterDTO.keyword;
     const filter = filterDTO.filters.split(',', Object.keys(Tags).length);
     const filterAsTags = filter.map((tag) => Tags[tag as keyof typeof Tags]);
+    let pengelolaLaundry;
     if (!!!filter) {
-      const pengelolaLaundry = await this.prismaService.user.findMany({
+      pengelolaLaundry = await this.prismaService.pengelolaLaundry.findMany({
         where: {
-          name: {
-            contains: keyword,
+          user: {
+            name: {
+              contains: keyword,
+            },
+          },
+        },
+        include: {
+          user: true,
+        },
+      });
+    } else if (!!!keyword) {
+      pengelolaLaundry = await this.prismaService.pengelolaLaundry.findMany({
+        where: {
+          tags: {
+            hasEvery: filterAsTags,
           },
         },
       });
-      if (!!!pengelolaLaundry) {
-        throw new BadRequestException('Pengelola laundry tidak ditemukan');
-      }
-      return {
-        statusCode: 200,
-        message: 'Success finding keyword',
-        data: pengelolaLaundry,
-      };
-    }
-
-    const pengelolaLaundry = await this.prismaService.pengelolaLaundry.findMany(
-      {
+    } else {
+      pengelolaLaundry = await this.prismaService.pengelolaLaundry.findMany({
         where: {
           tags: {
             hasEvery: filterAsTags,
@@ -63,8 +67,8 @@ export class DatabasePengelolaLaundryService {
         include: {
           user: true,
         },
-      },
-    );
+      });
+    }
 
     if (!!!pengelolaLaundry) {
       throw new BadRequestException('Pengelola laundry tidak ditemukan');
