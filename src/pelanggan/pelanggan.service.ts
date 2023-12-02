@@ -32,7 +32,10 @@ export class PelangganService {
       throw new BadRequestException('Pengelola laundry tidak ditemukan');
     }
 
-    const pesananSedangBerlangsung = await this.getPesananBerlangsung(id);
+    const pesananSedangBerlangsung = await this.getPesananBerlangsung(
+      id,
+      idPengelolaLaundry,
+    );
 
     if (!!pesananSedangBerlangsung) {
       throw new BadRequestException(
@@ -110,10 +113,11 @@ export class PelangganService {
     return pesanan;
   }
 
-  async getPesananBerlangsung(idPelanggan: string) {
+  async getPesananBerlangsung(idPelanggan: string, idPengelolaLaundry: string) {
     const pesanan = await this.prismaService.pesanan.findFirst({
       where: {
         pelangganId: idPelanggan,
+        pengelolaLaundryId: idPengelolaLaundry,
         status: {
           not: 'SELESAI',
         },
