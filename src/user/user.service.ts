@@ -39,4 +39,17 @@ export class UserService {
       data: pesanan,
     };
   }
+
+  async getDetailPesanan(pesananId: string) {
+    const pesanan = await this.prismaService.pesanan.findUnique({
+      where: {
+        id: pesananId,
+      },
+    });
+    return {
+      statusCode: 200,
+      message: 'Pesanan berhasil diambil',
+      data: pesanan,
+    };
+  }
 }

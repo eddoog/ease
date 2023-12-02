@@ -24,11 +24,52 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       where: {
         email: payload.email,
       },
+      include: {
+        Pelanggan: {
+          select: {
+            Pesanan: {
+              orderBy: {
+                waktuPesanan: 'desc',
+              },
+            },
+          },
+        },
+        PengelolaLaundry: {
+          select: {
+            Pesanan: {
+              orderBy: {
+                waktuPesanan: 'desc',
+              },
+            },
+            deskripsi: true,
+            jadwalOperasional: true,
+            Pemasukan: true,
+            Penilaian: true,
+            tags: true,
+          },
+        },
+      },
     });
 
     if (!user) {
       return null;
     }
+
+    delete user.password;
+
+    if (user.role === 'PELANGGAN') {
+      user['pesanan'] = user.Pelanggan.Pesanan;
+    } else if (user.role === 'PENGELOLA_LAUNDRY') {
+      user['pesanan'] = user.PengelolaLaundry.Pesanan;
+      user['deskripsi'] = user.PengelolaLaundry.deskripsi;
+      user['jadwalOperasional'] = user.PengelolaLaundry.jadwalOperasional;
+      user['pemasukan'] = user.PengelolaLaundry.Pemasukan;
+      user['penilaian'] = user.PengelolaLaundry.Penilaian;
+      user['tags'] = user.PengelolaLaundry.tags;
+    }
+
+    delete user.Pelanggan;
+    delete user.PengelolaLaundry;
 
     return user;
   }

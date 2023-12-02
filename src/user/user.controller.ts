@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Param,
   Post,
   UploadedFile,
   UseGuards,
@@ -45,5 +46,11 @@ export class UserController {
   @Roles(Role.PENGELOLA_LAUNDRY, Role.PELANGGAN)
   async getDaftarPesanan(@GetUser() user: User) {
     return this.userService.getDaftarPesanan(user.id, user.role as Role);
+  }
+
+  @Get('detail-pesanan/:id')
+  @Roles(Role.PENGELOLA_LAUNDRY, Role.PELANGGAN)
+  async getDetailPesanan(@Param('id') id: string) {
+    return this.userService.getDetailPesanan(id);
   }
 }
