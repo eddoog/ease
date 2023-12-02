@@ -24,7 +24,6 @@ export class UserController {
   @Get()
   @Roles(Role.PENGELOLA_LAUNDRY, Role.PELANGGAN)
   getCurrentUser(@GetUser() user: User) {
-    console.log(Role.PELANGGAN);
     return user;
   }
 
