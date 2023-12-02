@@ -1,8 +1,11 @@
 import {
+  Body,
   Controller,
   Get,
   Param,
+  Patch,
   Post,
+  Put,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -15,6 +18,11 @@ import { GetUser, Roles } from 'src/decorator';
 import { JwtAuthGuard, RolesGuard } from 'src/guard';
 import { ImageFileFilter } from './filters';
 import { UserService } from './user.service';
+import { UpdateInfoAkunDTO } from '../user/dto/update-info-akun.dto';
+import { ValidatePasswordDTO } from './dto/validate-password.dto';
+import { UpdatePasswordUserDTO } from './dto/update-password-user.dto';
+import { UpdateEmailUserDTO } from './dto/update-email-user.dto';
+
 
 @ApiTags('user')
 @Controller('user')
@@ -35,10 +43,11 @@ export class UserController {
     }),
   )
   uploadImage(
+    @GetUser('id') idPengguna: string,
     @UploadedFile()
     image: Express.Multer.File,
   ) {
-    return this.userService.uploadImage(image);
+    return this.userService.uploadImage(idPengguna, image);
   }
 
   @Get('daftar-pesanan')
@@ -52,4 +61,43 @@ export class UserController {
   async getDetailPesanan(@Param('id') id: string) {
     return this.userService.getDetailPesanan(id);
   }
+
+  
+  @Patch('update-profile')
+  async updateInformasiAkun(
+    @GetUser('id') idPengguna: string,
+    @Body() updateInformasiAkunDTO: UpdateInfoAkunDTO
+  ) {
+    return this.userService.updateInformasiAkun(idPengguna, updateInformasiAkunDTO);
+  }
+
+  @Post('validate-password')
+  async validatePassword(
+  @GetUser('password') userPassword: string,
+  @Body() inputPassword: ValidatePasswordDTO
+  ) {
+    // Validasi password
+    const  isValid = await this.userService.validatePassword(userPassword, inputPassword);
+
+    return { isValid };
+  }
+
+  @Patch('update-password')
+  async updatePasswordUser(
+    @GetUser('id') idPengguna: string,
+    @Body() updatePasswordUserDTO: UpdatePasswordUserDTO
+  ) {
+    return this.userService.updatePassword(idPengguna, updatePasswordUserDTO);
+  }
+
+  
+  @Patch('update-email')
+  async updateEmailUser(
+    @GetUser('id') idPengguna: string,
+    @Body() updateEmailUserDTO: UpdateEmailUserDTO
+  ) {
+    return this.userService.updateEmail(idPengguna, updateEmailUserDTO);
+  }
+
+  
 }
