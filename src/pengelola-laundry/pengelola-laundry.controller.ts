@@ -1,16 +1,10 @@
-import {
-  Controller,
-  UseGuards,
-  Post,
-  Body,
-  BadRequestException,
-} from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Role } from 'src/common';
-import { JwtAuthGuard, RolesGuard } from 'src/guard';
-import { PengelolaLaundryService } from './pengelola-laundry.service';
-import { CreatePenilaianDTO } from './dto/create-penilaian.dto';
 import { Roles } from 'src/decorator';
+import { JwtAuthGuard, RolesGuard } from 'src/guard';
+import { CreatePenilaianDTO } from './dto/create-penilaian.dto';
+import { PengelolaLaundryService } from './pengelola-laundry.service';
 
 @ApiTags('pengelola-laundry')
 @Controller('pengelola-laundry')
@@ -23,16 +17,6 @@ export class PengelolaLaundryController {
   @Post('create-penilaian')
   @Roles(Role.PELANGGAN)
   async createPenilaian(@Body() createPenilaianDTO: CreatePenilaianDTO) {
-    if (!!!createPenilaianDTO.rating) {
-      throw new BadRequestException('Rating tidak boleh kosong');
-    }
-
-    if (createPenilaianDTO.ulasan.length > 255) {
-      throw new BadRequestException(
-        'Ulasan terlalu panjang (max 255 karakter)',
-      );
-    }
-
     return this.pengelolaLaundryService.createPenilaian(createPenilaianDTO);
   }
 }

@@ -10,6 +10,16 @@ export class PengelolaLaundryService {
   async createPenilaian(createPenilaianDTO: CreatePenilaianDTO) {
     const { idPengelolaLaundry, rating, ulasan } = createPenilaianDTO;
 
+    if (!!!rating) {
+      throw new BadRequestException('Rating tidak boleh kosong');
+    }
+
+    if (ulasan.length > 255) {
+      throw new BadRequestException(
+        'Ulasan terlalu panjang (max 255 karakter)',
+      );
+    }
+
     // Check if the laundry exists before creating the rating
     const pengelolaLaundry = await this.getPengelolaLaundry(idPengelolaLaundry);
 
@@ -42,6 +52,15 @@ export class PengelolaLaundryService {
     const laundry = await this.prismaService.pengelolaLaundry.findUnique({
       where: { userId: idPengelolaLaundry },
     });
-    return laundry;
+
+    if (!!!laundry) {
+      throw new BadRequestException('Pengelola Laundry tidak ditemukan');
+    }
+
+    return {
+      statusCode: 200,
+      message: 'Success',
+      data: laundry,
+    };
   }
 }
