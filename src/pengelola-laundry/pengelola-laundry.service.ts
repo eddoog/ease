@@ -1,7 +1,11 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreatePenilaianDTO } from './dto/create-penilaian.dto';
-import { Penilaian } from '@prisma/client';
+import { Penilaian, Status } from '@prisma/client';
+import { EditStatusPesananDTO } from './dto/edit-status-pesanan.dto';
+import { StatusPesanan } from 'src/common';
+import { EditPesananDTO } from './dto/edit-pesanan.dto';
+import { GetTotalPemasukanDTO } from './dto/get-total-pemasukan.dto';
 
 @Injectable()
 export class PengelolaLaundryService {
@@ -63,5 +67,146 @@ export class PengelolaLaundryService {
       data: laundry,
     };
   }
-  
+
+  async editStatusPesanan(editStatusPesananDTO: EditStatusPesananDTO) {
+    const { idPesanan, status } = editStatusPesananDTO;
+
+    const pesanan = await this.prismaService.pesanan.findUnique({
+      where: {
+        id: idPesanan,
+      },
+    });
+
+    if (!!!pesanan) {
+      throw new BadRequestException('Pesanan tidak ditemukan');
+    }
+
+    try {
+      //Pesanan ditolak
+      if (status == StatusPesanan.DITOLAK) {
+        await this.prismaService.pesanan.delete({
+          where: {
+            id: idPesanan,
+          },
+        });
+
+        return {
+          statusCode: 204,
+          message: 'Success',
+          data: {},
+        };
+      }
+      //Pesanan selesai
+      if (status == StatusPesanan.SELESAI) {
+        const updatedPesanan = await this.prismaService.pesanan.update({
+          data: {
+            status: status,
+          },
+          where: {
+            id: pesanan.id,
+          },
+        });
+
+        if (!!!updatedPesanan) {
+          throw new BadRequestException('Gagal mengubah status pesanan');
+        }
+
+        const pemasukan = await this.prismaService.pemasukan.create({
+          data: {
+            nominal: updatedPesanan.harga,
+            Date: updatedPesanan.waktuPenyelesaian,
+            pengelolaLaundryId: updatedPesanan.pengelolaLaundryId,
+          },
+        });
+
+        if (!!!pemasukan) {
+          throw new BadRequestException('Gagal menambahkan pemasukan');
+        }
+
+        return {
+          statusCode: 200,
+          message: 'Success',
+          data: updatedPesanan,
+        };
+      // Pesanan diterima, status akan pending
+      }if (status == StatusPesanan.PENDING) {
+        const updatedPesanan = await this.prismaService.pesanan.update({
+          data: {
+            status: status,
+          },
+          where: {
+            id: pesanan.id,
+          },
+        });
+
+        if (!!!updatedPesanan) {
+          throw new BadRequestException('Gagal mengubah status pesanan');
+        }
+
+        return {
+          statusCode: 200,
+          message: 'Success',
+          data: updatedPesanan,
+        };
+      }
+    } catch (error) {
+      throw new BadRequestException(
+        'Terjadi kesalahan saat mengubah status pesanan',
+      );
+    }
+  }
+
+  async editPesanan(editPesananDTO: EditPesananDTO) {
+    const { idPesanan, berat, harga, status } = editPesananDTO;
+
+    const pesanan = await this.prismaService.pesanan.findUnique({
+      where: {
+        id: idPesanan,
+      },
+    });
+
+    if (!!!pesanan) {
+      throw new BadRequestException('Pesanan tidak ditemukan');
+    }
+
+    try {
+      const updatedPesanan = await this.prismaService.pesanan.update({
+        data: {
+          status: status,
+          berat: berat,
+          harga: harga,
+        },
+        where: {
+          id: pesanan.id,
+        },
+      });
+
+      if (!!!updatedPesanan) {
+        throw new BadRequestException('Gagal mengubah pesanan');
+      }
+
+      return {
+        statusCode: 200,
+        message: 'Success',
+        data: updatedPesanan,
+      };
+    } catch (error) {
+      throw new BadRequestException('Terjadi kesalahan saat mengubah pesanan');
+    }
+  }
+
+  async getTotalPemasukan(getTotalPemasukanDTO: GetTotalPemasukanDTO) {
+    const { idPengelolaLaundry, bulan, tahun } = getTotalPemasukanDTO;
+
+    const pesananList = await this.prismaService.pemasukan.findMany({
+      where: {
+        AND: [
+          {
+            pengelolaLaundryId: idPengelolaLaundry,
+            status: Status.SELESAI,
+          },
+        ],
+      },
+    });
+  }
 }

@@ -1,9 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsEnum,
     IsNotEmpty,
     IsString,
   } from 'class-validator';
-import { Status } from 'src/common';
+import { StatusPesanan } from 'src/common';
 
 export class EditStatusPesananDTO{
   @ApiProperty({
@@ -12,13 +13,13 @@ export class EditStatusPesananDTO{
   })
   @IsNotEmpty()
   @IsString()
-  idPesanan : String;
+  idPesanan : string;
   
   @ApiProperty({
     description: 'Status dari Pesanan',
     type: String,
   })
   @IsNotEmpty()
-  @IsString()
-  status : Status;  
+  @IsEnum(StatusPesanan)
+  status : StatusPesanan;  
 }
