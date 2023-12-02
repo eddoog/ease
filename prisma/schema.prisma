@@ -66,6 +66,7 @@ model PengelolaLaundry {
   user              User                @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   jadwalOperasional JadwalOperasional[]
 
+  tags Tags[]
   Pesanan   Pesanan[]
   Pemasukan Pemasukan[]
   Penilaian Penilaian[]

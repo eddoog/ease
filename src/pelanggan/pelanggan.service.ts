@@ -14,10 +14,30 @@ export class PelangganService {
   async createPesanan(id: string, createPesananDto: CreatePesananDTO) {
     const { idPengelolaLaundry, waktuPenyelesaian } = createPesananDto;
 
+    if (id === idPengelolaLaundry) {
+      throw new BadRequestException(
+        'Tidak dapat membuat pesanan untuk diri sendiri',
+      );
+    }
+
+    if (new Date(waktuPenyelesaian) < new Date()) {
+      throw new BadRequestException(
+        'Waktu penyelesaian tidak dapat lebih kecil dari waktu saat ini',
+      );
+    }
+
     const pengelolaLaundry = await this.getPengelolaLaundry(idPengelolaLaundry);
 
     if (!!!pengelolaLaundry) {
       throw new BadRequestException('Pengelola laundry tidak ditemukan');
+    }
+
+    const pesananSedangBerlangsung = await this.getPesananBerlangsung(id);
+
+    if (!!pesananSedangBerlangsung) {
+      throw new BadRequestException(
+        'Pesanan sedang berlangsung, silahkan tunggu sampai pesanan selesai',
+      );
     }
 
     let pesanan: Pesanan;
@@ -84,6 +104,19 @@ export class PelangganService {
     const pesanan = await this.prismaService.pesanan.findUnique({
       where: {
         id: idPesanan,
+      },
+    });
+
+    return pesanan;
+  }
+
+  async getPesananBerlangsung(idPelanggan: string) {
+    const pesanan = await this.prismaService.pesanan.findFirst({
+      where: {
+        pelangganId: idPelanggan,
+        status: {
+          not: 'SELESAI',
+        },
       },
     });
 
