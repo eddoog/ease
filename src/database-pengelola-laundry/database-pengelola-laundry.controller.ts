@@ -27,4 +27,10 @@ export class DatabasePengelolaLaundryController {
       filterDTO,
     );
   }
+
+  @Get()
+  @Roles(Role.PELANGGAN)
+  async findAllPengelolaLaundry() {
+    return this.databasePengelolaLaundryService.findAllPengelolaLaundry();
+  }
 }

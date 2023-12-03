@@ -80,4 +80,50 @@ export class DatabasePengelolaLaundryService {
       data: pengelolaLaundry,
     };
   }
+
+  async findAllPengelolaLaundry() {
+    const pengelolaLaundry = await this.prismaService.pengelolaLaundry.findMany(
+      {
+        include: {
+          Penilaian: true,
+          user: {
+            select: {
+              name: true,
+              address: true,
+            },
+          },
+        },
+      },
+    );
+
+    if (!!!pengelolaLaundry) {
+      throw new BadRequestException('Pengelola laundry tidak ditemukan');
+    }
+
+    const pengelolaLaundryWithRatings = pengelolaLaundry.map((pengelola) => {
+      const rating = pengelola.Penilaian.reduce(
+        (sum, penilaian) => sum + penilaian.nilai / pengelola.Penilaian.length,
+        0,
+      );
+
+      const { name, address } = pengelola.user;
+
+      delete pengelola.Penilaian;
+      delete pengelola.user;
+      delete pengelola.deskripsi;
+
+      return {
+        ...pengelola,
+        name,
+        rating,
+        address,
+      };
+    });
+
+    return {
+      statusCode: 200,
+      message: 'Success',
+      data: pengelolaLaundryWithRatings,
+    };
+  }
 }
