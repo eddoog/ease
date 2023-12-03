@@ -30,7 +30,7 @@ export class DatabasePengelolaLaundryController {
 
   @Get()
   @Roles(Role.PELANGGAN)
-  async findAllPengelolaLaundry(){
+  async findAllPengelolaLaundry() {
     return this.databasePengelolaLaundryService.findAllPengelolaLaundry();
   }
 }

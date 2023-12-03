@@ -23,7 +23,6 @@ import { ValidatePasswordDTO } from './dto/validate-password.dto';
 import { UpdatePasswordUserDTO } from './dto/update-password-user.dto';
 import { UpdateEmailUserDTO } from './dto/update-email-user.dto';
 
-
 @ApiTags('user')
 @Controller('user')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -62,22 +61,27 @@ export class UserController {
     return this.userService.getDetailPesanan(id);
   }
 
-  
   @Patch('update-profile')
   async updateInformasiAkun(
     @GetUser('id') idPengguna: string,
-    @Body() updateInformasiAkunDTO: UpdateInfoAkunDTO
+    @Body() updateInformasiAkunDTO: UpdateInfoAkunDTO,
   ) {
-    return this.userService.updateInformasiAkun(idPengguna, updateInformasiAkunDTO);
+    return this.userService.updateInformasiAkun(
+      idPengguna,
+      updateInformasiAkunDTO,
+    );
   }
 
   @Post('validate-password')
   async validatePassword(
-  @GetUser('password') userPassword: string,
-  @Body() inputPassword: ValidatePasswordDTO
+    @GetUser('password') userPassword: string,
+    @Body() inputPassword: ValidatePasswordDTO,
   ) {
     // Validasi password
-    const  isValid = await this.userService.validatePassword(userPassword, inputPassword);
+    const isValid = await this.userService.validatePassword(
+      userPassword,
+      inputPassword,
+    );
 
     return { isValid };
   }
@@ -85,19 +89,16 @@ export class UserController {
   @Patch('update-password')
   async updatePasswordUser(
     @GetUser('id') idPengguna: string,
-    @Body() updatePasswordUserDTO: UpdatePasswordUserDTO
+    @Body() updatePasswordUserDTO: UpdatePasswordUserDTO,
   ) {
     return this.userService.updatePassword(idPengguna, updatePasswordUserDTO);
   }
 
-  
   @Patch('update-email')
   async updateEmailUser(
     @GetUser('id') idPengguna: string,
-    @Body() updateEmailUserDTO: UpdateEmailUserDTO
+    @Body() updateEmailUserDTO: UpdateEmailUserDTO,
   ) {
     return this.userService.updateEmail(idPengguna, updateEmailUserDTO);
   }
-
-  
 }

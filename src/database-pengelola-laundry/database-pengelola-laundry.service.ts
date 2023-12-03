@@ -82,11 +82,13 @@ export class DatabasePengelolaLaundryService {
   }
 
   async findAllPengelolaLaundry() {
-    const pengelolaLaundry = await this.prismaService.pengelolaLaundry.findMany({
-      include: {
-        user: true,
+    const pengelolaLaundry = await this.prismaService.pengelolaLaundry.findMany(
+      {
+        include: {
+          user: true,
+        },
       },
-    });
+    );
 
     if (!!!pengelolaLaundry) {
       throw new BadRequestException('Pengelola laundry tidak ditemukan');
@@ -98,5 +100,4 @@ export class DatabasePengelolaLaundryService {
       data: pengelolaLaundry,
     };
   }
-
 }

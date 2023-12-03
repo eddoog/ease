@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException,BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { Pesanan } from '@prisma/client';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { Role } from 'src/common';
@@ -17,7 +21,7 @@ export class UserService {
     private readonly cloudinaryService: CloudinaryService,
   ) {}
 
-  async uploadImage(idPengguna:string, image: Express.Multer.File) {
+  async uploadImage(idPengguna: string, image: Express.Multer.File) {
     const uploadedImage = await this.cloudinaryService.uploadImage(image);
     await this.prismaService.user.update({
       where: { id: idPengguna },
@@ -64,7 +68,10 @@ export class UserService {
     };
   }
 
-  async updateInformasiAkun(idPengguna: string, updateInformasiAkunDTO: UpdateInfoAkunDTO) {
+  async updateInformasiAkun(
+    idPengguna: string,
+    updateInformasiAkunDTO: UpdateInfoAkunDTO,
+  ) {
     const pengguna = await this.prismaService.user.findUnique({
       where: { id: idPengguna },
     });
@@ -85,9 +92,14 @@ export class UserService {
     };
   }
 
-  async validatePassword(userPassword: string, validatePassword: ValidatePasswordDTO): Promise<boolean> {
-
-    const isPasswordValid = await verify(userPassword, validatePassword.password );
+  async validatePassword(
+    userPassword: string,
+    validatePassword: ValidatePasswordDTO,
+  ): Promise<boolean> {
+    const isPasswordValid = await verify(
+      userPassword,
+      validatePassword.password,
+    );
 
     if (!isPasswordValid) {
       throw new BadRequestException('Password does not match');
@@ -95,9 +107,13 @@ export class UserService {
     return isPasswordValid;
   }
 
-  async updatePassword(idPengguna: string, updatePasswordUserDTO : UpdatePasswordUserDTO) {
-
-    if (updatePasswordUserDTO.password !== updatePasswordUserDTO.confirmPassword) {
+  async updatePassword(
+    idPengguna: string,
+    updatePasswordUserDTO: UpdatePasswordUserDTO,
+  ) {
+    if (
+      updatePasswordUserDTO.password !== updatePasswordUserDTO.confirmPassword
+    ) {
       throw new BadRequestException('Password does not match');
     }
 
@@ -113,8 +129,10 @@ export class UserService {
     };
   }
 
-  async updateEmail(idPengguna: string, updateEmailUserDTO : UpdateEmailUserDTO) {
-
+  async updateEmail(
+    idPengguna: string,
+    updateEmailUserDTO: UpdateEmailUserDTO,
+  ) {
     const updatedEmail = await this.prismaService.user.update({
       where: { id: idPengguna },
       data: { email: updateEmailUserDTO.email },
@@ -123,8 +141,7 @@ export class UserService {
     return {
       statusCode: 200,
       message: 'Email berhasil diubah',
-      data : updatedEmail
+      data: updatedEmail,
     };
   }
-
 }
