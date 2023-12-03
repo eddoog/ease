@@ -100,7 +100,7 @@ export class PengelolaLaundryService {
       if (status == StatusPesanan.SELESAI) {
         const updatedPesanan = await this.prismaService.pesanan.update({
           data: {
-            status: status,
+            status: StatusPesanan.SELESAI,
           },
           where: {
             id: pesanan.id,
@@ -114,7 +114,6 @@ export class PengelolaLaundryService {
         const pemasukan = await this.prismaService.pemasukan.create({
           data: {
             nominal: updatedPesanan.harga,
-            Date: updatedPesanan.waktuPenyelesaian,
             pengelolaLaundryId: updatedPesanan.pengelolaLaundryId,
           },
         });
@@ -128,11 +127,12 @@ export class PengelolaLaundryService {
           message: 'Success',
           data: updatedPesanan,
         };
-      // Pesanan diterima, status akan pending
-      }if (status == StatusPesanan.PENDING) {
+        // Pesanan diterima, status akan pending
+      }
+      if (status == StatusPesanan.PENDING) {
         const updatedPesanan = await this.prismaService.pesanan.update({
           data: {
-            status: status,
+            status: StatusPesanan.PENDING,
           },
           where: {
             id: pesanan.id,
@@ -157,7 +157,7 @@ export class PengelolaLaundryService {
   }
 
   async editPesanan(editPesananDTO: EditPesananDTO) {
-    const { idPesanan, berat, harga, status } = editPesananDTO;
+    const { idPesanan, berat, harga } = editPesananDTO;
 
     const pesanan = await this.prismaService.pesanan.findUnique({
       where: {
@@ -172,7 +172,7 @@ export class PengelolaLaundryService {
     try {
       const updatedPesanan = await this.prismaService.pesanan.update({
         data: {
-          status: status,
+          status: Status.DIPROSES,
           berat: berat,
           harga: harga,
         },
@@ -198,15 +198,52 @@ export class PengelolaLaundryService {
   async getTotalPemasukan(getTotalPemasukanDTO: GetTotalPemasukanDTO) {
     const { idPengelolaLaundry, bulan, tahun } = getTotalPemasukanDTO;
 
-    const pesananList = await this.prismaService.pemasukan.findMany({
-      where: {
-        AND: [
-          {
-            pengelolaLaundryId: idPengelolaLaundry,
-            status: Status.SELESAI,
+    // Check if the laundry exists before creating the rating
+    const pengelolaLaundry = await this.getPengelolaLaundry(idPengelolaLaundry);
+
+    if (!!!pengelolaLaundry) {
+      throw new BadRequestException('Pengelola Laundry tidak ditemukan');
+    }
+
+    let nextMonth = bulan + 1;
+    let nextYear = tahun;
+
+    if (nextMonth > 12) {
+      nextMonth = 1;
+      nextYear++;
+    }
+    
+    try {
+      const pemasukanList = await this.prismaService.pemasukan.findMany({
+        where: {
+          pengelolaLaundryId: idPengelolaLaundry,
+          Date: {
+            gte: new Date(`${tahun}-${bulan}-01 00:00:00.000Z`),
+            lt: new Date(`${nextYear}-${nextMonth}-01 00:00:00.000Z`),
           },
-        ],
-      },
-    });
+        },
+        orderBy: {
+          Date: 'asc',
+        },
+      });
+
+      let totalPemasukan = 0;
+      pemasukanList.forEach((pemasukan) => {
+        totalPemasukan += pemasukan.nominal;
+      });
+
+      return {
+        statusCode: 200,
+        message: 'Success',
+        data: {
+          pemasukanList,
+          totalPemasukan,
+        },
+      };
+    } catch (error) {
+      throw new BadRequestException(
+        'Terjadi kesalahan saat mengambil data pemasukan',
+      );
+    }
   }
 }

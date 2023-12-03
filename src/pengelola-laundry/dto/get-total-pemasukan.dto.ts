@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class GetTotalPemasukanDTO {
@@ -17,7 +18,7 @@ export class GetTotalPemasukanDTO {
   @IsOptional()
   @IsNotEmpty()
   @IsNumber()
-  bulan: Number;
+  bulan: number;
 
   @ApiProperty({
     description: 'Tahun Pemasukan',
