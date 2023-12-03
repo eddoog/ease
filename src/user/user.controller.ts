@@ -5,7 +5,6 @@ import {
   Param,
   Patch,
   Post,
-  Put,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -16,12 +15,12 @@ import { User } from '@prisma/client';
 import { Role } from 'src/common';
 import { GetUser, Roles } from 'src/decorator';
 import { JwtAuthGuard, RolesGuard } from 'src/guard';
+import { UpdateInfoAkunDTO } from '../user/dto/update-info-akun.dto';
+import { UpdateEmailUserDTO } from './dto/update-email-user.dto';
+import { UpdatePasswordUserDTO } from './dto/update-password-user.dto';
+import { ValidatePasswordDTO } from './dto/validate-password.dto';
 import { ImageFileFilter } from './filters';
 import { UserService } from './user.service';
-import { UpdateInfoAkunDTO } from '../user/dto/update-info-akun.dto';
-import { ValidatePasswordDTO } from './dto/validate-password.dto';
-import { UpdatePasswordUserDTO } from './dto/update-password-user.dto';
-import { UpdateEmailUserDTO } from './dto/update-email-user.dto';
 
 @ApiTags('user')
 @Controller('user')

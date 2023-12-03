@@ -14,4 +14,3 @@ export enum StatusPesanan {
   SELESAI = 'SELESAI',
   DITOLAK = 'DITOLAK',
 }
-

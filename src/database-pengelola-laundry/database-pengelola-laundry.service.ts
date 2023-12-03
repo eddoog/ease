@@ -13,16 +13,48 @@ export class DatabasePengelolaLaundryService {
         where: {
           userId: id,
         },
+        include: {
+          Penilaian: true,
+          user: {
+            select: {
+              name: true,
+              address: true,
+              image: true,
+            },
+          },
+        },
       });
 
     if (!!!pengelolaLaundry) {
       throw new BadRequestException('Pengelola laundry tidak ditemukan');
     }
 
+    const rating = pengelolaLaundry.Penilaian.reduce(
+      (sum, penilaian) =>
+        sum + penilaian.nilai / pengelolaLaundry.Penilaian.length,
+      0,
+    );
+
+    const ulasan = pengelolaLaundry.Penilaian.map((penilaian) => {
+      return penilaian.ulasan;
+    });
+
+    const { name, address, image } = pengelolaLaundry.user;
+
+    delete pengelolaLaundry.Penilaian;
+    delete pengelolaLaundry.user;
+
     return {
       statusCode: 200,
       message: 'Success',
-      data: pengelolaLaundry,
+      data: {
+        ...pengelolaLaundry,
+        name,
+        rating,
+        ulasan,
+        address,
+        image,
+      },
     };
   }
 

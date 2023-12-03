@@ -1,18 +1,17 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
-  BadRequestException,
 } from '@nestjs/common';
 import { Pesanan } from '@prisma/client';
+import { hash, verify } from 'argon2';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { Role } from 'src/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { UpdateInfoAkunDTO } from './dto/update-info-akun.dto';
-import { ValidatePasswordDTO } from './dto/validate-password.dto';
-import { hash, verify } from 'argon2';
-import { UpdatePasswordUserDTO } from './dto/update-password-user.dto';
 import { UpdateEmailUserDTO } from './dto/update-email-user.dto';
-import { Console } from 'console';
+import { UpdateInfoAkunDTO } from './dto/update-info-akun.dto';
+import { UpdatePasswordUserDTO } from './dto/update-password-user.dto';
+import { ValidatePasswordDTO } from './dto/validate-password.dto';
 
 @Injectable()
 export class UserService {
@@ -118,7 +117,7 @@ export class UserService {
     }
 
     const hashedPassword = await hash(updatePasswordUserDTO.password);
-    const updatedPassword = await this.prismaService.user.update({
+    await this.prismaService.user.update({
       where: { id: idPengguna },
       data: { password: hashedPassword },
     });
