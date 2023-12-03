@@ -80,4 +80,23 @@ export class DatabasePengelolaLaundryService {
       data: pengelolaLaundry,
     };
   }
+
+  async findAllPengelolaLaundry() {
+    const pengelolaLaundry = await this.prismaService.pengelolaLaundry.findMany({
+      include: {
+        user: true,
+      },
+    });
+
+    if (!!!pengelolaLaundry) {
+      throw new BadRequestException('Pengelola laundry tidak ditemukan');
+    }
+
+    return {
+      statusCode: 200,
+      message: 'Success',
+      data: pengelolaLaundry,
+    };
+  }
+
 }
