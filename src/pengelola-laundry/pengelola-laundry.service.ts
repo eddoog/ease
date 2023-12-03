@@ -84,6 +84,21 @@ export class PengelolaLaundryService {
     if (!!!pesanan) {
       throw new BadRequestException('Pesanan tidak ditemukan');
     }
+    //Tidak bisa mengubah status ketika sudah selesai
+    if (pesanan.status == StatusPesanan.SELESAI) {
+      throw new BadRequestException(
+        'Pesanan sudah selesai, tidak bisa diubah lagi',
+      );
+    }
+    //Bisa ubah status saat berat dan harga barang sudah diisi
+    if (
+      !!!pesanan.berat &&
+      pesanan.status !== StatusPesanan.MENUNGGU_KONFIRMASI
+    ) {
+      throw new BadRequestException(
+        'Isi berat dan harga barang untuk bisa ubah status',
+      );
+    }
 
     try {
       //Pesanan ditolak
@@ -132,11 +147,10 @@ export class PengelolaLaundryService {
           data: updatedPesanan,
         };
         // Pesanan diterima, status akan pending
-      }
-      if (status == StatusPesanan.PENDING) {
+      } else {
         const updatedPesanan = await this.prismaService.pesanan.update({
           data: {
-            status: StatusPesanan.PENDING,
+            status: status,
           },
           where: {
             id: pesanan.id,
@@ -202,21 +216,23 @@ export class PengelolaLaundryService {
   async getTotalPemasukan(getTotalPemasukanDTO: GetTotalPemasukanDTO) {
     const { idPengelolaLaundry, bulan, tahun } = getTotalPemasukanDTO;
 
-    // Check if the laundry exists before creating the rating
     const pengelolaLaundry = await this.getPengelolaLaundry(idPengelolaLaundry);
 
     if (!!!pengelolaLaundry) {
       throw new BadRequestException('Pengelola Laundry tidak ditemukan');
     }
+    if (bulan > 12) {
+      throw new BadRequestException('Tidak boleh bulan lebih dari 12');
+    }
 
     let nextMonth = bulan + 1;
     let nextYear = tahun;
 
-    if (nextMonth > 12) {
+    if (nextMonth == 13) {
       nextMonth = 1;
       nextYear++;
     }
-    
+
     try {
       const pemasukanList = await this.prismaService.pemasukan.findMany({
         where: {
