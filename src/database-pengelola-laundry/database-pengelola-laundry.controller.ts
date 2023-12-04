@@ -14,19 +14,19 @@ export class DatabasePengelolaLaundryController {
     private readonly databasePengelolaLaundryService: DatabasePengelolaLaundryService,
   ) {}
 
-  // @Get(':id')
-  // @Roles(Role.PELANGGAN, Role.PENGELOLA_LAUNDRY)
-  // async getPengelolaLaundry(@Param('id') id: string) {
-  //   return this.databasePengelolaLaundryService.getPengelolaLaundry(id);
-  // }
+  @Get(':id')
+  @Roles(Role.PELANGGAN, Role.PENGELOLA_LAUNDRY)
+  async getPengelolaLaundry(@Param('id') id: string) {
+    return this.databasePengelolaLaundryService.getPengelolaLaundry(id);
+  }
 
-  // @Post('filter')
-  // @Roles(Role.PELANGGAN)
-  // async filterPengelolaLaundry(@Body() filterDTO: FilterDTO) {
-  //   return this.databasePengelolaLaundryService.filterPengelolaLaundry(
-  //     filterDTO,
-  //   );
-  // }
+  @Post('filter')
+  @Roles(Role.PELANGGAN)
+  async filterPengelolaLaundry(@Body() filterDTO: FilterDTO) {
+    return this.databasePengelolaLaundryService.filterPengelolaLaundry(
+      filterDTO,
+    );
+  }
 
   @Get()
   @Roles(Role.PELANGGAN)
