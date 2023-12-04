@@ -1,26 +1,28 @@
-import { Injectable, NotFoundException,BadRequestException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Pesanan } from '@prisma/client';
+import { hash, verify } from 'argon2';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { Role } from 'src/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { UpdateInfoAkunDTO } from './dto/update-info-akun.dto';
-import { ValidatePasswordDTO } from './dto/validate-password.dto';
-import { hash, verify } from 'argon2';
-import { UpdatePasswordUserDTO } from './dto/update-password-user.dto';
 import { UpdateEmailUserDTO } from './dto/update-email-user.dto';
-import { Console } from 'console';
+import { UpdateInfoAkunDTO } from './dto/update-info-akun.dto';
+import { UpdatePasswordUserDTO } from './dto/update-password-user.dto';
 
-import { Days } from '@prisma/client';
 import { Tags } from '@prisma/client';
+import { ValidatePasswordDTO } from './dto/validate-password.dto';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly cloudinaryService: CloudinaryService,
-  ) {}
+  ) { }
 
-  async uploadImage(idPengguna:string, image: Express.Multer.File) {
+  async uploadImage(idPengguna: string, image: Express.Multer.File) {
     const uploadedImage = await this.cloudinaryService.uploadImage(image);
     await this.prismaService.user.update({
       where: { id: idPengguna },
@@ -67,7 +69,10 @@ export class UserService {
     };
   }
 
-  async updateInformasiAkun(idPengguna: string, updateInformasiAkunDTO: UpdateInfoAkunDTO) {
+  async updateInformasiAkun(
+    idPengguna: string,
+    updateInformasiAkunDTO: UpdateInfoAkunDTO,
+  ) {
     const pengguna = await this.prismaService.user.findUnique({
       where: { id: idPengguna },
     });
@@ -77,8 +82,8 @@ export class UserService {
     }
 
     const data = {
-      name : updateInformasiAkunDTO.name,
-      address : updateInformasiAkunDTO.address,
+      name: updateInformasiAkunDTO.name,
+      address: updateInformasiAkunDTO.address,
     }
 
     const updatedUser = await this.prismaService.user.update({
@@ -92,9 +97,9 @@ export class UserService {
     //   const data = {
     //     // jadwalOperasional: updateInformasiAkunDTO.jadwalOperasional,
     //     tags: this.stringsToTags(updateInformasiAkunDTO.tags) ,
-        
+
     //   }
-      
+
     //   const updatedUser = await this.prismaService.pengelolaLaundry.update({
     //     where: { userId: idPengguna },
     //     data: data,
@@ -108,9 +113,14 @@ export class UserService {
     };
   }
 
-  async validatePassword(userPassword: string, validatePassword: ValidatePasswordDTO): Promise<boolean> {
-
-    const isPasswordValid = await verify(userPassword, validatePassword.password );
+  async validatePassword(
+    userPassword: string,
+    validatePassword: ValidatePasswordDTO,
+  ): Promise<boolean> {
+    const isPasswordValid = await verify(
+      userPassword,
+      validatePassword.password,
+    );
 
     if (!isPasswordValid) {
       throw new BadRequestException('Password does not match');
@@ -118,14 +128,18 @@ export class UserService {
     return isPasswordValid;
   }
 
-  async updatePassword(idPengguna: string, updatePasswordUserDTO : UpdatePasswordUserDTO) {
-
-    if (updatePasswordUserDTO.password !== updatePasswordUserDTO.confirmPassword) {
+  async updatePassword(
+    idPengguna: string,
+    updatePasswordUserDTO: UpdatePasswordUserDTO,
+  ) {
+    if (
+      updatePasswordUserDTO.password !== updatePasswordUserDTO.confirmPassword
+    ) {
       throw new BadRequestException('Password does not match');
     }
 
     const hashedPassword = await hash(updatePasswordUserDTO.password);
-    const updatedPassword = await this.prismaService.user.update({
+    await this.prismaService.user.update({
       where: { id: idPengguna },
       data: { password: hashedPassword },
     });
@@ -136,8 +150,10 @@ export class UserService {
     };
   }
 
-  async updateEmail(idPengguna: string, updateEmailUserDTO : UpdateEmailUserDTO) {
-
+  async updateEmail(
+    idPengguna: string,
+    updateEmailUserDTO: UpdateEmailUserDTO,
+  ) {
     const updatedEmail = await this.prismaService.user.update({
       where: { id: idPengguna },
       data: { email: updateEmailUserDTO.email },
@@ -146,14 +162,14 @@ export class UserService {
     return {
       statusCode: 200,
       message: 'Email berhasil diubah',
-      data : updatedEmail
+      data: updatedEmail,
     };
   }
 
   stringsToTags(tags: string[]): Tags[] {
     let tagsArray: Tags[] = [];
     tags.forEach((tag) => {
-      tagsArray.push( tag as Tags);
+      tagsArray.push(tag as Tags);
     });
     return tagsArray;
   }
