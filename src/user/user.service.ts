@@ -104,11 +104,42 @@ export class UserService {
       where: {
         id: pesananId,
       },
+      include: {
+        pelanggan: {
+          include: {
+            user: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+        pengelolaLaundry: {
+          include: {
+            user: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+      },
     });
+
+    const pengelolaLaundryName = pesanan.pengelolaLaundry.user.name;
+    const pelangganName = pesanan.pelanggan.user.name;
+
+    delete pesanan.pengelolaLaundry;
+    delete pesanan.pelanggan;
+
     return {
       statusCode: 200,
-      message: 'Pesanan berhasil diambil',
-      data: pesanan,
+      message: 'Success',
+      data: {
+        ...pesanan,
+        pengelolaLaundryName,
+        pelangganName,
+      },
     };
   }
 
