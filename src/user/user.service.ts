@@ -13,6 +13,8 @@ import { UpdateInfoAkunDTO } from './dto/update-info-akun.dto';
 import { UpdatePasswordUserDTO } from './dto/update-password-user.dto';
 
 import { Tags } from '@prisma/client';
+import { Days } from '@prisma/client';
+import { JadwalOperasional } from '@prisma/client';
 import { ValidatePasswordDTO } from './dto/validate-password.dto';
 
 @Injectable()
@@ -91,20 +93,49 @@ export class UserService {
       data: data,
     });
 
-    console.log(this.stringsToTags(updateInformasiAkunDTO.tags));
 
-    // if (pengguna.role === Role.PENGELOLA_LAUNDRY) {
-    //   const data = {
-    //     // jadwalOperasional: updateInformasiAkunDTO.jadwalOperasional,
-    //     tags: this.stringsToTags(updateInformasiAkunDTO.tags) ,
+    if (pengguna.role === Role.PENGELOLA_LAUNDRY) {
+      let data = {
+        deskripsi: updateInformasiAkunDTO.deskripsi,
+      }
 
-    //   }
+      if (updateInformasiAkunDTO.jadwalOperasional) {
 
-    //   const updatedUser = await this.prismaService.pengelolaLaundry.update({
-    //     where: { userId: idPengguna },
-    //     data: data,
-    //   });
-    // }
+        for(let i = 0; i < updateInformasiAkunDTO.jadwalOperasional.length; i++){
+          const inputHari : Days = updateInformasiAkunDTO.jadwalOperasional[i].hari as Days;
+          await this.prismaService.jadwalOperasional.upsert({
+            where: { 
+                pengelolaLaundryId_hari: {
+                    pengelolaLaundryId: idPengguna,
+                    hari: inputHari
+                  }
+             },
+            update: {
+              jamBuka : updateInformasiAkunDTO.jadwalOperasional[i].jamBuka,
+              jamTutup : updateInformasiAkunDTO.jadwalOperasional[i].jamTutup,
+            },
+            create: {
+              hari: inputHari,
+              pengelolaLaundryId: idPengguna,
+              jamBuka: updateInformasiAkunDTO.jadwalOperasional[i].jamBuka,
+              jamTutup: updateInformasiAkunDTO.jadwalOperasional[i].jamTutup,
+            },
+          });
+        }
+      }
+
+      if (updateInformasiAkunDTO.tags !== undefined  ){
+        data['tags'] = this.stringsToTags(updateInformasiAkunDTO.tags);
+      }
+
+      if (data) {
+        const updatedUser = await this.prismaService.pengelolaLaundry.update({
+          where: { userId: idPengguna },
+          data: data,
+        });
+      }
+
+    }
 
     return {
       statusCode: 200,
@@ -166,12 +197,45 @@ export class UserService {
     };
   }
 
+  // async getJadwalOperasional(idPengelolaLaundry: string) {
+  //   const jadwalOperasional = await this.prismaService.jadwalOperasional.findMany({
+  //     where: { pengelolaLaundryId: idPengelolaLaundry },
+  //   });
+
+  //   return {
+  //     statusCode: 200,
+  //     message: 'Success',
+  //     data: jadwalOperasional,
+  //   };
+  // }
+
   stringsToTags(tags: string[]): Tags[] {
     let tagsArray: Tags[] = [];
     tags.forEach((tag) => {
       tagsArray.push(tag as Tags);
     });
     return tagsArray;
+  }
+
+  daysToInt(day : Days){
+    switch(day){
+      case 'SENIN':
+        return 1;
+      case 'SELASA':
+        return 2;
+      case 'RABU':
+        return 3;
+      case 'KAMIS':
+        return 4;
+      case 'JUMAT':
+        return 5;
+      case 'SABTU':
+        return 6;
+      case 'MINGGU':
+        return 7;
+      default:
+        return 0;
+    }
   }
 
 }

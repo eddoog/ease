@@ -88,12 +88,13 @@ model Pesanan {
 }
 
 model JadwalOperasional {
-  id                 Int              @id @default(autoincrement())
   hari               Days
   jamBuka            String
   jamTutup           String
   pengelolaLaundryId String
   pengelolaLaundry   PengelolaLaundry @relation(fields: [pengelolaLaundryId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id([pengelolaLaundryId, hari])
 }
 
 model Pemasukan {
