@@ -10,6 +10,9 @@ import { UpdatePasswordUserDTO } from './dto/update-password-user.dto';
 import { UpdateEmailUserDTO } from './dto/update-email-user.dto';
 import { Console } from 'console';
 
+import { Days } from '@prisma/client';
+import { Tags } from '@prisma/client';
+
 @Injectable()
 export class UserService {
   constructor(
@@ -73,10 +76,30 @@ export class UserService {
       throw new NotFoundException('Pengguna tidak ditemukan');
     }
 
+    const data = {
+      name : updateInformasiAkunDTO.name,
+      address : updateInformasiAkunDTO.address,
+    }
+
     const updatedUser = await this.prismaService.user.update({
       where: { id: idPengguna },
-      data: updateInformasiAkunDTO,
+      data: data,
     });
+
+    console.log(this.stringsToTags(updateInformasiAkunDTO.tags));
+
+    // if (pengguna.role === Role.PENGELOLA_LAUNDRY) {
+    //   const data = {
+    //     // jadwalOperasional: updateInformasiAkunDTO.jadwalOperasional,
+    //     tags: this.stringsToTags(updateInformasiAkunDTO.tags) ,
+        
+    //   }
+      
+    //   const updatedUser = await this.prismaService.pengelolaLaundry.update({
+    //     where: { userId: idPengguna },
+    //     data: data,
+    //   });
+    // }
 
     return {
       statusCode: 200,
@@ -125,6 +148,14 @@ export class UserService {
       message: 'Email berhasil diubah',
       data : updatedEmail
     };
+  }
+
+  stringsToTags(tags: string[]): Tags[] {
+    let tagsArray: Tags[] = [];
+    tags.forEach((tag) => {
+      tagsArray.push( tag as Tags);
+    });
+    return tagsArray;
   }
 
 }

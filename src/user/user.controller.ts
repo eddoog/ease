@@ -86,7 +86,7 @@ export class UserController {
   async updatePasswordUser(
     @GetUser('id') idPengguna: string,
     @Body() updatePasswordUserDTO: UpdatePasswordUserDTO
-  ) {
+  ) { 
     return this.userService.updatePassword(idPengguna, updatePasswordUserDTO);
   }
 

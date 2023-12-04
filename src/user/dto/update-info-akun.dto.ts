@@ -1,8 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Days } from '@prisma/client';
+import { Tags } from '@prisma/client';
 import {
   IsString,
   IsOptional,
 } from 'class-validator';
+
+class JadwalOperasional {
+  jamBuka : string;
+  jamTutup : string;
+  hari : Days;
+}
 
 export class UpdateInfoAkunDTO {
   @ApiProperty({
@@ -20,4 +28,27 @@ export class UpdateInfoAkunDTO {
   @IsString()
   @IsOptional()
   address: string;
+
+  @ApiProperty({
+    description: 'Deskripsi laundry',
+    type: String,
+  })
+  @IsString()
+  @IsOptional()
+  deskripsi: string;
+
+  @ApiProperty({
+    description: 'Jadwal operasional laundry',
+    type: JadwalOperasional,
+  })
+  @IsOptional()
+  jadwalOperasional: JadwalOperasional[];
+
+
+  @ApiProperty({
+    description: 'Service yang disediakan laundry',
+    type: Tags,
+  })
+  @IsOptional()
+  tags: Tags[]
 }
