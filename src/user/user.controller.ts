@@ -100,4 +100,9 @@ export class UserController {
   ) {
     return this.userService.updateEmail(idPengguna, updateEmailUserDTO);
   }
+
+  // @Get('get-jadwal')
+  // async getJadwalOperasional(@GetUser('id') idPengguna: string) {
+  //   return this.userService.getJadwalOperasional(idPengguna);
+  // }
 }
