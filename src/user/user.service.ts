@@ -3,7 +3,6 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Pesanan } from '@prisma/client';
 import { hash, verify } from 'argon2';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { Role } from 'src/common';
@@ -35,22 +34,66 @@ export class UserService {
   }
 
   async getDaftarPesanan(userId: string, userRole: Role) {
-    let pesanan: Pesanan[];
+    let listPesananWithName;
 
     if (userRole === Role.PELANGGAN) {
-      pesanan = await this.prismaService.pesanan.findMany({
+      const listPesanan = await this.prismaService.pesanan.findMany({
         where: { pelangganId: userId },
+        include: {
+          pengelolaLaundry: {
+            include: {
+              user: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      listPesananWithName = listPesanan.map((pesanan) => {
+        const { name } = pesanan.pengelolaLaundry.user;
+
+        delete pesanan.pengelolaLaundry;
+
+        return {
+          ...pesanan,
+          name,
+        };
       });
     } else if (userRole === Role.PENGELOLA_LAUNDRY) {
-      pesanan = await this.prismaService.pesanan.findMany({
+      const listPesanan = await this.prismaService.pesanan.findMany({
         where: { pengelolaLaundryId: userId },
+        include: {
+          pelanggan: {
+            include: {
+              user: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      listPesananWithName = listPesanan.map((pesanan) => {
+        const { name } = pesanan.pelanggan.user;
+
+        delete pesanan.pelanggan;
+
+        return {
+          ...pesanan,
+          name,
+        };
       });
     }
 
     return {
       statusCode: 200,
       message: 'Success',
-      data: pesanan,
+      data: listPesananWithName,
     };
   }
 
