@@ -145,13 +145,23 @@ export class UserService {
   }
 
   async validatePassword(
-    userPassword: string,
+    idPengguna: string,
     validatePassword: ValidatePasswordDTO,
   ): Promise<boolean> {
+
+    const pengguna = await this.prismaService.user.findUnique({
+      where: { id: idPengguna },
+    });
+
+   
+
     const isPasswordValid = await verify(
-      userPassword,
+      pengguna.password,
       validatePassword.password,
     );
+
+    // console.log(pengguna.password);
+    // const isPasswordValid = false;
 
     if (!isPasswordValid) {
       throw new BadRequestException('Password does not match');
@@ -163,6 +173,15 @@ export class UserService {
     idPengguna: string,
     updatePasswordUserDTO: UpdatePasswordUserDTO,
   ) {
+
+    const pengguna = await this.prismaService.user.findUnique({
+      where: { id: idPengguna },
+    });
+
+    if (!pengguna) {
+      throw new NotFoundException('Pengguna tidak ditemukan');
+    }
+
     if (
       updatePasswordUserDTO.password !== updatePasswordUserDTO.confirmPassword
     ) {
@@ -185,6 +204,16 @@ export class UserService {
     idPengguna: string,
     updateEmailUserDTO: UpdateEmailUserDTO,
   ) {
+
+    const pengguna = await this.prismaService.user.findUnique({
+      where: { id: idPengguna },
+    });
+
+    if (!pengguna) {
+      throw new NotFoundException('Pengguna tidak ditemukan');
+    }
+
+
     const updatedEmail = await this.prismaService.user.update({
       where: { id: idPengguna },
       data: { email: updateEmailUserDTO.email },
