@@ -12,9 +12,7 @@ import { UpdateEmailUserDTO } from './dto/update-email-user.dto';
 import { UpdateInfoAkunDTO } from './dto/update-info-akun.dto';
 import { UpdatePasswordUserDTO } from './dto/update-password-user.dto';
 
-import { Tags } from '@prisma/client';
-import { Days } from '@prisma/client';
-import { JadwalOperasional } from '@prisma/client';
+import { Days, Tags } from '@prisma/client';
 import { ValidatePasswordDTO } from './dto/validate-password.dto';
 
 @Injectable()
@@ -22,7 +20,7 @@ export class UserService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly cloudinaryService: CloudinaryService,
-  ) { }
+  ) {}
 
   async uploadImage(idPengguna: string, image: Express.Multer.File) {
     const uploadedImage = await this.cloudinaryService.uploadImage(image);
@@ -86,33 +84,36 @@ export class UserService {
     const data = {
       name: updateInformasiAkunDTO.name,
       address: updateInformasiAkunDTO.address,
-    }
+    };
 
     const updatedUser = await this.prismaService.user.update({
       where: { id: idPengguna },
       data: data,
     });
 
-
     if (pengguna.role === Role.PENGELOLA_LAUNDRY) {
-      let data = {
+      const data = {
         deskripsi: updateInformasiAkunDTO.deskripsi,
-      }
+      };
 
       if (updateInformasiAkunDTO.jadwalOperasional) {
-
-        for(let i = 0; i < updateInformasiAkunDTO.jadwalOperasional.length; i++){
-          const inputHari : Days = updateInformasiAkunDTO.jadwalOperasional[i].hari as Days;
+        for (
+          let i = 0;
+          i < updateInformasiAkunDTO.jadwalOperasional.length;
+          i++
+        ) {
+          const inputHari: Days = updateInformasiAkunDTO.jadwalOperasional[i]
+            .hari as Days;
           await this.prismaService.jadwalOperasional.upsert({
-            where: { 
-                pengelolaLaundryId_hari: {
-                    pengelolaLaundryId: idPengguna,
-                    hari: inputHari
-                  }
-             },
+            where: {
+              pengelolaLaundryId_hari: {
+                pengelolaLaundryId: idPengguna,
+                hari: inputHari,
+              },
+            },
             update: {
-              jamBuka : updateInformasiAkunDTO.jadwalOperasional[i].jamBuka,
-              jamTutup : updateInformasiAkunDTO.jadwalOperasional[i].jamTutup,
+              jamBuka: updateInformasiAkunDTO.jadwalOperasional[i].jamBuka,
+              jamTutup: updateInformasiAkunDTO.jadwalOperasional[i].jamTutup,
             },
             create: {
               hari: inputHari,
@@ -124,17 +125,16 @@ export class UserService {
         }
       }
 
-      if (updateInformasiAkunDTO.tags !== undefined  ){
+      if (updateInformasiAkunDTO.tags !== undefined) {
         data['tags'] = this.stringsToTags(updateInformasiAkunDTO.tags);
       }
 
       if (data) {
-        const updatedUser = await this.prismaService.pengelolaLaundry.update({
+        await this.prismaService.pengelolaLaundry.update({
           where: { userId: idPengguna },
           data: data,
         });
       }
-
     }
 
     return {
@@ -239,15 +239,15 @@ export class UserService {
   // }
 
   stringsToTags(tags: string[]): Tags[] {
-    let tagsArray: Tags[] = [];
+    const tagsArray: Tags[] = [];
     tags.forEach((tag) => {
       tagsArray.push(tag as Tags);
     });
     return tagsArray;
   }
 
-  daysToInt(day : Days){
-    switch(day){
+  daysToInt(day: Days) {
+    switch (day) {
       case 'SENIN':
         return 1;
       case 'SELASA':
@@ -266,5 +266,4 @@ export class UserService {
         return 0;
     }
   }
-
 }
