@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -99,7 +100,7 @@ export class UserService {
     };
   }
 
-  async getDetailPesanan(pesananId: string) {
+  async getDetailPesanan(pesananId: string, currentUserId: string, role: Role) {
     const pesanan = await this.prismaService.pesanan.findUnique({
       where: {
         id: pesananId,
@@ -125,6 +126,23 @@ export class UserService {
         },
       },
     });
+
+    switch (role) {
+      case Role.PELANGGAN:
+        if (pesanan.pelangganId != currentUserId) {
+          throw new ForbiddenException(
+            'Anda tidak mempunyai akses untuk mengakses pesanan ini.',
+          );
+        }
+        break;
+      case Role.PENGELOLA_LAUNDRY:
+        if (pesanan.pengelolaLaundryId != currentUserId) {
+          throw new ForbiddenException(
+            'Anda tidak mempunyai akses untuk mengakses pesanan ini.',
+          );
+        }
+        break;
+    }
 
     const pengelolaLaundryName = pesanan.pengelolaLaundry.user.name;
     const pelangganName = pesanan.pelanggan.user.name;

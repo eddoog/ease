@@ -56,8 +56,12 @@ export class UserController {
 
   @Get('detail-pesanan/:id')
   @Roles(Role.PENGELOLA_LAUNDRY, Role.PELANGGAN)
-  async getDetailPesanan(@Param('id') id: string) {
-    return this.userService.getDetailPesanan(id);
+  async getDetailPesanan(
+    @Param('id') id: string,
+    @GetUser('id') currentUserId,
+    @GetUser('role') role,
+  ) {
+    return this.userService.getDetailPesanan(id, currentUserId, role);
   }
 
   @Patch('update-profile')
