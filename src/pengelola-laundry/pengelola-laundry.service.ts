@@ -1,11 +1,16 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { Penilaian, Status } from '@prisma/client';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { StatusPesanan } from 'src/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreatePenilaianDTO } from './dto/create-penilaian.dto';
-import { EditPesananDTO } from './dto/edit-pesanan.dto';
+import { Days, Penilaian, Status } from '@prisma/client';
 import { EditStatusPesananDTO } from './dto/edit-status-pesanan.dto';
 import { GetTotalPemasukanDTO } from './dto/get-total-pemasukan.dto';
+import { UpdateJadwalDTO } from './dto/edit-jadwal.dto';
+import { EditPesananDTO } from './dto';
 
 @Injectable()
 export class PengelolaLaundryService {
@@ -268,6 +273,97 @@ export class PengelolaLaundryService {
       throw new BadRequestException(
         'Terjadi kesalahan saat mengambil data pemasukan',
       );
+    }
+  }
+
+  async updateJadwal(idPengelola: string, updateJadwalDTO: UpdateJadwalDTO) {
+    const pengelola = await this.prismaService.pengelolaLaundry.findUnique({
+      where: { userId: idPengelola },
+    });
+
+    if (!pengelola) {
+      throw new NotFoundException('Pengguna tidak ditemukan');
+    }
+
+    for (let i = 0; i < updateJadwalDTO.jadwalOperasional.length; i++) {
+      // time : 20:00
+      const jamBuka: number = parseInt(
+        updateJadwalDTO.jadwalOperasional[i].jamBuka.split(':')[0],
+      );
+      const menitBuka: number = parseInt(
+        updateJadwalDTO.jadwalOperasional[i].jamBuka.split(':')[1],
+      );
+
+      const jamTutup: number = parseInt(
+        updateJadwalDTO.jadwalOperasional[i].jamTutup.split(':')[0],
+      );
+      const menitTutup: number = parseInt(
+        updateJadwalDTO.jadwalOperasional[i].jamTutup.split(':')[1],
+      );
+
+      if (jamBuka > jamTutup) {
+        throw new BadRequestException(
+          'Jam buka tidak boleh lebih dari jam tutup',
+        );
+      } else if (jamBuka == jamTutup) {
+        if (menitBuka > menitTutup) {
+          throw new BadRequestException(
+            'Jam buka tidak boleh lebih dari jam tutup',
+          );
+        }
+      }
+    }
+
+    let data = [];
+    for (let i = 0; i < updateJadwalDTO.jadwalOperasional.length; i++) {
+      const inputHari: Days = updateJadwalDTO.jadwalOperasional[i].hari as Days;
+      const updatedJadwal = await this.prismaService.jadwalOperasional.upsert({
+        where: {
+          pengelolaLaundryId_hari: {
+            pengelolaLaundryId: idPengelola,
+            hari: inputHari,
+          },
+        },
+        update: {
+          jamBuka: updateJadwalDTO.jadwalOperasional[i].jamBuka,
+          jamTutup: updateJadwalDTO.jadwalOperasional[i].jamTutup,
+        },
+        create: {
+          hari: inputHari,
+          pengelolaLaundryId: idPengelola,
+          jamBuka: updateJadwalDTO.jadwalOperasional[i].jamBuka,
+          jamTutup: updateJadwalDTO.jadwalOperasional[i].jamTutup,
+        },
+      });
+
+      data.push(updatedJadwal);
+    }
+
+    return {
+      statusCode: 200,
+      message: 'Jadwal berhasil diubah',
+      data: data,
+    };
+  }
+
+  daysToInt(day: Days) {
+    switch (day) {
+      case 'SENIN':
+        return 1;
+      case 'SELASA':
+        return 2;
+      case 'RABU':
+        return 3;
+      case 'KAMIS':
+        return 4;
+      case 'JUMAT':
+        return 5;
+      case 'SABTU':
+        return 6;
+      case 'MINGGU':
+        return 7;
+      default:
+        return 0;
     }
   }
 }

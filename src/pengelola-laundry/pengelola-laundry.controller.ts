@@ -8,6 +8,7 @@ import { PengelolaLaundryService } from './pengelola-laundry.service';
 import { EditStatusPesananDTO } from './dto/edit-status-pesanan.dto';
 import { EditPesananDTO } from './dto/edit-pesanan.dto';
 import { GetTotalPemasukanDTO } from './dto/get-total-pemasukan.dto';
+import { UpdateJadwalDTO } from './dto/edit-jadwal.dto';
 
 @ApiTags('pengelola-laundry')
 @Controller('pengelola-laundry')
@@ -41,5 +42,17 @@ export class PengelolaLaundryController {
     @GetUser('id') idPengelolaLaundry: string,
     @Body() getTotalPemasukanDTO: GetTotalPemasukanDTO) {
     return this.pengelolaLaundryService.getTotalPemasukan(idPengelolaLaundry, getTotalPemasukanDTO);
+  }
+
+  @Patch('edit-jadwal')
+  @Roles(Role.PENGELOLA_LAUNDRY)
+  async editJadwal(
+    @GetUser('id') idPengelolaLaundry: string,
+    @Body() updateJadwalDTO: UpdateJadwalDTO,
+  ) {
+    return this.pengelolaLaundryService.updateJadwal(
+      idPengelolaLaundry,
+      updateJadwalDTO,
+    );
   }
 }
