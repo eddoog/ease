@@ -187,7 +187,7 @@ export class PengelolaLaundryService {
     if (!!!pesanan) {
       throw new BadRequestException('Pesanan tidak ditemukan');
     }
-    
+
     if (pesanan.status == StatusPesanan.SELESAI) {
       throw new BadRequestException(
         'Pesanan sudah selesai, tidak bisa diubah lagi',
@@ -222,7 +222,8 @@ export class PengelolaLaundryService {
 
   async getTotalPemasukan(
     idPengelolaLaundry: string,
-    getTotalPemasukanDTO: GetTotalPemasukanDTO) {
+    getTotalPemasukanDTO: GetTotalPemasukanDTO,
+  ) {
     const { bulan, tahun } = getTotalPemasukanDTO;
 
     const pengelolaLaundry = await this.getPengelolaLaundry(idPengelolaLaundry);

@@ -40,8 +40,12 @@ export class PengelolaLaundryController {
   @Roles(Role.PENGELOLA_LAUNDRY)
   async getTotalPemasukan(
     @GetUser('id') idPengelolaLaundry: string,
-    @Body() getTotalPemasukanDTO: GetTotalPemasukanDTO) {
-    return this.pengelolaLaundryService.getTotalPemasukan(idPengelolaLaundry, getTotalPemasukanDTO);
+    @Body() getTotalPemasukanDTO: GetTotalPemasukanDTO,
+  ) {
+    return this.pengelolaLaundryService.getTotalPemasukan(
+      idPengelolaLaundry,
+      getTotalPemasukanDTO,
+    );
   }
 
   @Patch('edit-jadwal')
