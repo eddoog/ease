@@ -22,6 +22,7 @@ export class DatabasePengelolaLaundryService {
               image: true,
             },
           },
+          jadwalOperasional: true,
         },
       });
 
