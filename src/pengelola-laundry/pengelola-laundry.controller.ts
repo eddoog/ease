@@ -44,9 +44,13 @@ export class PengelolaLaundryController {
 
   @Patch('edit-jadwal')
   @Roles(Role.PENGELOLA_LAUNDRY)
-  async editJadwal( 
+  async editJadwal(
     @GetUser('id') idPengelolaLaundry: string,
-    @Body() updateJadwalDTO: UpdateJadwalDTO) {
-    return this.pengelolaLaundryService.updateJadwal(idPengelolaLaundry, updateJadwalDTO);
+    @Body() updateJadwalDTO: UpdateJadwalDTO,
+  ) {
+    return this.pengelolaLaundryService.updateJadwal(
+      idPengelolaLaundry,
+      updateJadwalDTO,
+    );
   }
 }

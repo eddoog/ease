@@ -240,12 +240,9 @@ export class UserService {
     idPengguna: string,
     validatePassword: ValidatePasswordDTO,
   ): Promise<boolean> {
-
     const pengguna = await this.prismaService.user.findUnique({
       where: { id: idPengguna },
     });
-
-   
 
     const isPasswordValid = await verify(
       pengguna.password,
@@ -265,7 +262,6 @@ export class UserService {
     idPengguna: string,
     updatePasswordUserDTO: UpdatePasswordUserDTO,
   ) {
-
     const pengguna = await this.prismaService.user.findUnique({
       where: { id: idPengguna },
     });
@@ -296,7 +292,6 @@ export class UserService {
     idPengguna: string,
     updateEmailUserDTO: UpdateEmailUserDTO,
   ) {
-
     const pengguna = await this.prismaService.user.findUnique({
       where: { id: idPengguna },
     });
@@ -304,7 +299,6 @@ export class UserService {
     if (!pengguna) {
       throw new NotFoundException('Pengguna tidak ditemukan');
     }
-
 
     const updatedEmail = await this.prismaService.user.update({
       where: { id: idPengguna },

@@ -3,9 +3,9 @@ import { Days } from '@prisma/client';
 import { IsNotEmpty } from 'class-validator';
 
 class JadwalOperasional {
-  jamBuka : string;
-  jamTutup : string;
-  hari : Days;
+  jamBuka: string;
+  jamTutup: string;
+  hari: Days;
 }
 
 export class UpdateJadwalDTO {
@@ -15,5 +15,4 @@ export class UpdateJadwalDTO {
   })
   @IsNotEmpty()
   jadwalOperasional: JadwalOperasional[];
-
 }
