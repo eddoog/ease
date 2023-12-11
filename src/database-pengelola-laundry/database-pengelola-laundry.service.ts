@@ -60,9 +60,15 @@ export class DatabasePengelolaLaundryService {
   }
 
   async filterPengelolaLaundry(filterDTO: FilterDTO) {
-    const keyword = filterDTO.keyword;
-    const filter = filterDTO.filters.split(',', Object.keys(Tags).length);
-    const filterAsTags = filter.map((tag) => Tags[tag as keyof typeof Tags]);
+    const keyword = filterDTO.keyword === ' ' ? '' : filterDTO.keyword.trim();
+    const filter =
+      filterDTO.filters.trim() === ''
+        ? null
+        : filterDTO.filters.split(',', Object.keys(Tags).length);
+    const filterAsTags =
+      filter !== null
+        ? filter.map((tag) => Tags[tag as keyof typeof Tags])
+        : null;
     let pengelolaLaundry;
     if (!!!filter) {
       pengelolaLaundry = await this.prismaService.pengelolaLaundry.findMany({
@@ -84,6 +90,9 @@ export class DatabasePengelolaLaundryService {
             hasEvery: filterAsTags,
           },
         },
+        include: {
+          user: true,
+        },
       });
     } else {
       pengelolaLaundry = await this.prismaService.pengelolaLaundry.findMany({
@@ -103,14 +112,32 @@ export class DatabasePengelolaLaundryService {
       });
     }
 
-    if (!!!pengelolaLaundry) {
+
+    if (!!!pengelolaLaundry || pengelolaLaundry.length === 0) {
       throw new BadRequestException('Pengelola laundry tidak ditemukan');
     }
+
+    const pengelolaLaundryWithRatings = pengelolaLaundry.map((pengelola) => {
+      const rating = pengelola.Penilaian;
+
+      const { name, address } = pengelola.user;
+
+      delete pengelola.Penilaian;
+      delete pengelola.user;
+      delete pengelola.deskripsi;
+
+      return {
+        ...pengelola,
+        name,
+        rating,
+        address,
+      };
+    });
 
     return {
       statusCode: 200,
       message: 'Success Filtering',
-      data: pengelolaLaundry,
+      data: pengelolaLaundryWithRatings,
     };
   }
 
