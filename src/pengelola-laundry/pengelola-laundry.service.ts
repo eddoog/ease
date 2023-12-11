@@ -276,6 +276,25 @@ export class PengelolaLaundryService {
       throw new NotFoundException('Pengguna tidak ditemukan');
     }
 
+    for(let i = 0; i < updateJadwalDTO.jadwalOperasional.length; i++){
+      // time : 20:00
+      const jamBuka : number = parseInt(updateJadwalDTO.jadwalOperasional[i].jamBuka.split(':')[0]);
+      const menitBuka : number = parseInt(updateJadwalDTO.jadwalOperasional[i].jamBuka.split(':')[1]);
+
+      const jamTutup : number = parseInt(updateJadwalDTO.jadwalOperasional[i].jamTutup.split(':')[0]);
+      const menitTutup : number = parseInt(updateJadwalDTO.jadwalOperasional[i].jamTutup.split(':')[1]);
+
+      if (jamBuka > jamTutup) {
+        throw new BadRequestException('Jam buka tidak boleh lebih dari jam tutup');
+      } else if (jamBuka == jamTutup ){
+        if (menitBuka > menitTutup) {
+          throw new BadRequestException('Jam buka tidak boleh lebih dari jam tutup');
+        }
+      }
+      
+    }
+
+
     let data = []
     for(let i = 0; i < updateJadwalDTO.jadwalOperasional.length; i++){
       const inputHari : Days = updateJadwalDTO.jadwalOperasional[i].hari as Days;
