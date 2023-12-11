@@ -77,14 +77,11 @@ export class UserController {
 
   @Post('validate-password')
   async validatePassword(
-    @GetUser('password') userPassword: string,
-    @Body() inputPassword: ValidatePasswordDTO,
+  @GetUser('id') idPengguna: string,
+  @Body() inputPassword: ValidatePasswordDTO
   ) {
     // Validasi password
-    const isValid = await this.userService.validatePassword(
-      userPassword,
-      inputPassword,
-    );
+    const  isValid = await this.userService.validatePassword(idPengguna, inputPassword);
 
     return { isValid };
   }

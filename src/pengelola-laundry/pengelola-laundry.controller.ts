@@ -1,13 +1,14 @@
 import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Role } from 'src/common';
-import { Roles } from 'src/decorator';
+import { GetUser, Roles } from 'src/decorator';
 import { JwtAuthGuard, RolesGuard } from 'src/guard';
 import { CreatePenilaianDTO } from './dto/create-penilaian.dto';
 import { PengelolaLaundryService } from './pengelola-laundry.service';
 import { EditStatusPesananDTO } from './dto/edit-status-pesanan.dto';
 import { EditPesananDTO } from './dto/edit-pesanan.dto';
 import { GetTotalPemasukanDTO } from './dto/get-total-pemasukan.dto';
+import { UpdateJadwalDTO } from './dto/edit-jadwal.dto';
 
 @ApiTags('pengelola-laundry')
 @Controller('pengelola-laundry')
@@ -39,5 +40,13 @@ export class PengelolaLaundryController {
   @Roles(Role.PENGELOLA_LAUNDRY)
   async getTotalPemasukan(@Body() getTotalPemasukanDTO: GetTotalPemasukanDTO) {
     return this.pengelolaLaundryService.getTotalPemasukan(getTotalPemasukanDTO);
+  }
+
+  @Patch('edit-jadwal')
+  @Roles(Role.PENGELOLA_LAUNDRY)
+  async editJadwal( 
+    @GetUser('id') idPengelolaLaundry: string,
+    @Body() updateJadwalDTO: UpdateJadwalDTO) {
+    return this.pengelolaLaundryService.updateJadwal(idPengelolaLaundry, updateJadwalDTO);
   }
 }
