@@ -112,7 +112,6 @@ export class DatabasePengelolaLaundryService {
       });
     }
 
-
     if (!!!pengelolaLaundry || pengelolaLaundry.length === 0) {
       throw new BadRequestException('Pengelola laundry tidak ditemukan');
     }

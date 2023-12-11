@@ -188,6 +188,12 @@ export class PengelolaLaundryService {
       throw new BadRequestException('Pesanan tidak ditemukan');
     }
 
+    if (pesanan.status == StatusPesanan.SELESAI) {
+      throw new BadRequestException(
+        'Pesanan sudah selesai, tidak bisa diubah lagi',
+      );
+    }
+
     try {
       const updatedPesanan = await this.prismaService.pesanan.update({
         data: {
@@ -214,8 +220,11 @@ export class PengelolaLaundryService {
     }
   }
 
-  async getTotalPemasukan(getTotalPemasukanDTO: GetTotalPemasukanDTO) {
-    const { idPengelolaLaundry, bulan, tahun } = getTotalPemasukanDTO;
+  async getTotalPemasukan(
+    idPengelolaLaundry: string,
+    getTotalPemasukanDTO: GetTotalPemasukanDTO,
+  ) {
+    const { bulan, tahun } = getTotalPemasukanDTO;
 
     const pengelolaLaundry = await this.getPengelolaLaundry(idPengelolaLaundry);
 
