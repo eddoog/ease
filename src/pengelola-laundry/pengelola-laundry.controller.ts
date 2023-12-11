@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Role } from 'src/common';
-import { Roles } from 'src/decorator';
+import { GetUser, Roles } from 'src/decorator';
 import { JwtAuthGuard, RolesGuard } from 'src/guard';
 import { CreatePenilaianDTO } from './dto/create-penilaian.dto';
 import { PengelolaLaundryService } from './pengelola-laundry.service';
@@ -37,7 +37,9 @@ export class PengelolaLaundryController {
 
   @Get('get-total-pemasukan')
   @Roles(Role.PENGELOLA_LAUNDRY)
-  async getTotalPemasukan(@Body() getTotalPemasukanDTO: GetTotalPemasukanDTO) {
-    return this.pengelolaLaundryService.getTotalPemasukan(getTotalPemasukanDTO);
+  async getTotalPemasukan(
+    @GetUser('id') idPengelolaLaundry: string,
+    @Body() getTotalPemasukanDTO: GetTotalPemasukanDTO) {
+    return this.pengelolaLaundryService.getTotalPemasukan(idPengelolaLaundry, getTotalPemasukanDTO);
   }
 }
